@@ -1,7 +1,9 @@
 import yaml
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.schema import MetaData
 
 class DatabaseConnector:
+
     def __init__(self) -> None:
         self.__HOST = None
         self.__PASSWORD = None
@@ -25,12 +27,30 @@ class DatabaseConnector:
             self.__USER = output['RDS_USER']
             self.__DATABASE = output['RDS_DATABASE']
             self.__PORT = output['RDS_PORT']
+
             print('Data successfully read!')
         except:
             pass
 
-        conn = create_engine(f'mysql+pymysql://{self.__USER}:{self.__PASSWORD}@{self.__HOST}:{self.__PORT}/{self.__DATABASE}')
+        conn = create_engine(f'postgresql+pg8000://{self.__USER}:{self.__PASSWORD}@{self.__HOST}:{self.__PORT}/{self.__DATABASE}')
         
         return conn
+    
+    def list_db_tables(self):
+        connector = self.init_db_engine()
+        
+        try:
+            with connector.connect() as conn:
+                inspector = inspect(conn)
+                schemas = inspector.get_schema_names()
+                for schema in schemas:
+                    print("schema: %s" % schema)
+                    for table_name in inspector.get_table_names(schema=schema):
+                        for column in inspector.get_columns(table_name, schema=schema):
+                            print("Column: %s" % column)
+        except:
+            print('Error!')
 
-DatabaseConnector().init_db_engine()
+new_connector = DatabaseConnector()
+
+new_connector.list_db_tables()
