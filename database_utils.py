@@ -1,6 +1,6 @@
 import yaml
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.schema import MetaData
+import pandas as pd
 
 class DatabaseConnector:
 
@@ -18,8 +18,8 @@ class DatabaseConnector:
         
         return output
     
-    def init_db_engine(self):
-        output = self.read_db_creds('config/db_creds')
+    def init_db_engine(self, filename:str):
+        output = self.read_db_creds(filename)
 
         try:
             self.__HOST = output['RDS_HOST']
@@ -37,20 +37,32 @@ class DatabaseConnector:
         return conn
     
     def list_db_tables(self):
-        connector = self.init_db_engine()
+        '''
+        list tables within the database
+        '''
+        connector = self.init_db_engine('config/db_creds')
         
         try:
             with connector.connect() as conn:
                 inspector = inspect(conn)
                 schemas = inspector.get_schema_names()
                 for schema in schemas:
-                    print("schema: %s" % schema)
                     for table_name in inspector.get_table_names(schema=schema):
-                        for column in inspector.get_columns(table_name, schema=schema):
-                            print("Column: %s" % column)
+                        print(f'Table name: {table_name}')
         except:
-            print('Error!')
+            print('Error! Cannot connect to database')
 
-new_connector = DatabaseConnector()
+    def upload_to_db(self, dataframe, tablename:str):
+        '''
+        upload into the local database. Raise error if 'dataframe' object is not a pandas dataframe
+        '''
+        local_conn = self.init_db_engine('config/mysql_creds')
 
-new_connector.list_db_tables()
+        if isinstance(dataframe, pd.DataFrame):
+            with local_conn.connect() as con:
+                dataframe.to_sql('dim_users', con)
+        else:
+            raise TypeError
+
+
+        
