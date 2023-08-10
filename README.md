@@ -11,8 +11,8 @@ My first goal will be to produce a system that stores the current company data i
 * [2. Creating the database schema](#2-Creating-the-database-schema)
 * [3. Querying the dataset](#3-Querying-the-dataset)
 
-# 1. Extract and clean data from sources
+## 1. Extract and clean data from sources
 
-# 2. Creating the database schema
+## 2. Creating the database schema
 
-# 3. Querying the dataset
+## 3. Querying the dataset

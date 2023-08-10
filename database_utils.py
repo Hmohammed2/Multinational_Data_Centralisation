@@ -34,16 +34,16 @@ class DatabaseConnector:
         self.__PORT = output['RDS_PORT']
 
         try:
-            # if statement that verifies driver dialect. Default driver dialect set to postgres
+            # if statement that verifies driver dialect. Default driver dialect set to postgresql+pg8000
             if dialect == None:
-                conn = create_engine(f'{self.dialect}://{self.__USER}:{self.__PASSWORD}@{self.__HOST}:{self.__PORT}/{self.__DATABASE}')
+                conn_engine = create_engine(f'{self.dialect}://{self.__USER}:{self.__PASSWORD}@{self.__HOST}:{self.__PORT}/{self.__DATABASE}')
             else:
-                conn = create_engine(f'{dialect}://{self.__USER}:{self.__PASSWORD}@{self.__HOST}:{self.__PORT}/{self.__DATABASE}')
+                conn_engine = create_engine(f'{dialect}://{self.__USER}:{self.__PASSWORD}@{self.__HOST}:{self.__PORT}/{self.__DATABASE}')
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error
         
-        return conn
+        return conn_engine
     
     def list_db_tables(self):
         '''
@@ -64,7 +64,7 @@ class DatabaseConnector:
 
     def upload_to_db(self, dataframe, tablename:str):
         '''
-        upload into the local database. Raise error if 'dataframe' object is not a pandas dataframe
+        Upload dataframe into the local database. Raise error if 'dataframe' object is not a pandas dataframe
         '''
         local_conn = self.init_db_engine('config/mysql_creds', 'mysql+pymysql')
         
